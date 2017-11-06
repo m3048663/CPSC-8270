@@ -29,9 +29,13 @@
  * Most of the definitions and specifications were taken from:
  * https://docs.python.org/2.7/reference/index.html
  */
+
 #include "stdbool.h"
 #include "parse.tab.h"
+#include "includes/ast.h"
+
 #include <string>
+
 
 
 /* Code to handle locations */
@@ -272,10 +276,18 @@ comment   #.*
 "with"     { return WITH; }
 "yield"    { return YIELD; }
 
-{number}   { ++numbers; return NUMBER; }
+
 {name}     { ++identifiers;
             yylval.str = strdup(yytext); 
             return NAME; }
+{integer}   {
+                yylval.intNumber = atoi(yytext);
+                return INT;
+            }
+{floatnumber} {
+                yylval.fltNumber = atof(yytext);
+                return FLOAT;
+            }
 
 <<EOF>>    { handle_eof(); return ENDMARKER; }
 
