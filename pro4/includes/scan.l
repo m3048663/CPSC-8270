@@ -30,9 +30,9 @@
  * https://docs.python.org/2.7/reference/index.html
  */
 
+#include "includes/ast.h"
 #include "stdbool.h"
 #include "parse.tab.h"
-#include "includes/ast.h"
 
 #include <string>
 

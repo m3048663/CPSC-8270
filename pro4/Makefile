@@ -9,10 +9,13 @@ OBJS = main.o parse.tab.o lex.yy.o ast.o symbolTable.o poolOfNodes.o
 run: $(OBJS)
 	$(CCC) $(CFLAGS) -o run $(OBJS)
 
-main.o: main.cpp
+main.o: main.cpp includes/parse.tab.h
 	$(CCC) $(CFLAGS) -c main.cpp
 
 parse.tab.c: includes/parse.y
+	$(YACC) -d includes/parse.y
+
+parse.tab.h: includes/parse.y
 	$(YACC) -d includes/parse.y
 
 parse.tab.o: parse.tab.c

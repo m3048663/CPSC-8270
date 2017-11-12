@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include "literal.h"
+#include "node.h"
 
 extern void yyerror(const char*);
 extern void yyerror(const char*, const char);
@@ -21,6 +22,29 @@ public:
 private:
   std::string ident;
 };
+
+class UnaryNode : public Node {
+public:
+  UnaryNode(Node* u): Node(), unary(u) {}
+  virtual const Literal* eval() const = 0;
+  UnaryNode(const UnaryNode&) = delete;
+  UnaryNode& operator=(const UnaryNode&) = delete;
+protected:
+  Node *unary;
+};
+
+class PosUnaryNode : public UnaryNode{
+public:
+  PosUnaryNode(Node* unary);
+  virtual const Literal* eval() const;
+};
+
+class NegUnaryNode : public UnaryNode{
+public:
+  NegUnaryNode(Node* unary);
+  virtual const Literal* eval() const;
+};
+
 
 class BinaryNode : public Node {
 public:
@@ -47,6 +71,18 @@ public:
   virtual const Literal* eval() const;
 };
 
+class AddEqualBinaryNode : public BinaryNode {
+public:
+  AddEqualBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  virtual const Literal* eval() const;
+};
+
+class SubEqualBinaryNode : public BinaryNode {
+public:
+  SubEqualBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  virtual const Literal* eval() const;
+};
+
 class SubBinaryNode : public BinaryNode {
 public:
   SubBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
@@ -64,4 +100,11 @@ public:
   DivBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
   virtual const Literal* eval() const;
 };
+
+class PercentBinaryNode : public BinaryNode {
+public:
+  PercentBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  virtual const Literal* eval() const;
+};
+
 
