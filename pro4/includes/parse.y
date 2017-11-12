@@ -271,7 +271,12 @@ expr_stmt // Used in: small_stmt
 					pool.add($$);
 					//($$)->eval()->print();
 				}
-			else $$ = $1;
+			else 
+			{
+				$$ = $1;
+				if ($1)
+					($$)->eval()->print();
+			}
 			
 			//pool.add($$);
 		}
