@@ -638,14 +638,14 @@ factor // Used in: term, factor, power
 					{
 						$$ = new PosUnaryNode($2);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break;
 					}
 				case '-':
 					{
 						$$ = new NegUnaryNode($2);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break;
 					}
 			}		

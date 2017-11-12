@@ -35,13 +35,13 @@ protected:
 
 class PosUnaryNode : public UnaryNode{
 public:
-  PosUnaryNode(Node* unary);
+  PosUnaryNode(Node* unary):UnaryNode(unary){};
   virtual const Literal* eval() const;
 };
 
 class NegUnaryNode : public UnaryNode{
 public:
-  NegUnaryNode(Node* unary);
+  NegUnaryNode(Node* unary):UnaryNode(unary){};
   virtual const Literal* eval() const;
 };
 
