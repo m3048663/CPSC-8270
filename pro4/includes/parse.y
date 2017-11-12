@@ -646,10 +646,8 @@ term // Used in: arith_expr, term
 					}
 				case '1' :
 					{
-						break;
-					}
-				case '2' :
-					{
+						$$ = new DbSlashBinaryNode($1,$3);
+						pool.add($$);
 						break;
 					}
 			}
@@ -661,7 +659,6 @@ pick_multop // Used in: term
 	| SLASH { $$ = '/';}
 	| PERCENT 		{$$ = '%';}
 	| DOUBLESLASH 	{ $$ = '1';}
-	| DOUBLESTAR 	{ $$ = '2';}
 	;
 factor // Used in: term, factor, power
 	: pick_unop factor	
@@ -703,7 +700,14 @@ pick_unop // Used in: factor
 	| TILDE { $$ = '~';}
 	;
 power // Used in: factor
-	: atom star_trailer DOUBLESTAR factor	{$$ = $1;}
+	: atom star_trailer DOUBLESTAR factor	
+	{
+		if ($1 && $4)
+		{
+			$$ = new DbStarBinaryNode($1,$4);
+			pool.add($$);
+		}
+	}
 	| atom star_trailer		
 	{
 		if ($2) 
@@ -716,7 +720,7 @@ power // Used in: factor
 	;
 star_trailer // Used in: power, star_trailer
 	: star_trailer trailer
-	| %empty
+	| %empty 	{$$ = 0;}
 	;
 atom // Used in: power
 	: LPAR opt_yield_test RPAR {$$ = $2;}
