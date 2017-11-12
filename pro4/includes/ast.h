@@ -107,4 +107,16 @@ public:
   virtual const Literal* eval() const;
 };
 
+class DbStarBinaryNode : public BinaryNode {
+public:
+  DbStarBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  virtual const Literal* eval() const;
+};
+
+
+class DbSlashBinaryNode : public BinaryNode {
+public:
+  DbSlashBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  virtual const Literal* eval() const;
+};
 

@@ -61,8 +61,8 @@
 %type <intNumber> INT
 %type <fltNumber> FLOAT
 %type <node> atom power factor term arith_expr testlist pick_yield_expr_testlist
-%type <node> star_EQUAL shift_expr and_expr xor_expr expr comparison
-%type <node> not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt
+star_EQUAL shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
+arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test
 %type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign
 
 %start start
@@ -93,8 +93,8 @@ decorator // Used in: decorators
 	| AT dotted_name NEWLINE
 	;
 opt_arglist // Used in: decorator, trailer
-	: arglist
-	| %empty
+	: arglist 	{$$ = $1;}
+	| %empty 	{$$ = 0;}
 	;
 decorators // Used in: decorators, decorated
 	: decorators decorator
@@ -131,8 +131,8 @@ funcdef // Used in: decorated, compound_stmt
         }
 	;
 parameters // Used in: funcdef
-	: LPAR varargslist RPAR
-	| LPAR RPAR
+	: LPAR varargslist RPAR 	{$$ = 0;}
+	| LPAR RPAR 	{$$ = 0;}
 	;
 varargslist // Used in: parameters, old_lambdef, lambdef
 	: star_fpdef_COMMA pick_STAR_DOUBLESTAR
@@ -200,44 +200,64 @@ expr_stmt // Used in: small_stmt
 			{
 				case '0':
 					{
-						$$ = new AddEqualBinaryNode($1,$3);
-						pool.add($$);
-						($$)->eval()->print();
+						Node* temp = new AddBinaryNode($1,$3);
+						$1 = new AsgBinaryNode($1,temp);
+						pool.add($1);
+						delete temp;
+						//($$)->eval()->print();
 						break;
 					}
 				case '1':
 					{
-						$$ = new SubEqualBinaryNode($1,$3);
-						pool.add($$);
-						($$)->eval()->print();
+						Node* temp = new SubEqualBinaryNode($1,$3);
+						$1 = new AsgBinaryNode($1,temp);
+						pool.add($1);
+						delete temp;
+						//($$)->eval()->print();
 						break;					
 					}
 				case '2':
 					{
 						Node* temp = new MulBinaryNode($1,$3);
-						$$ = new AsgBinaryNode($1,temp);
-						pool.add($$);
+						$1 = new AsgBinaryNode($1,temp);
+						pool.add($1);
 						delete temp;
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break; 
 					}
 				case '3':
 				{
 						Node* temp = new DivBinaryNode($1,$3);
-						$$ = new AsgBinaryNode($1,temp);
-						pool.add($$);
+						$1 = new AsgBinaryNode($1,temp);
+						pool.add($1);
 						delete temp;
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break; 
 				}
 				case '4':
 				{
 						Node* temp = new PercentBinaryNode($1,$3);
-						$$ = new AsgBinaryNode($1,temp);
-						pool.add($$);
+						$1 = new AsgBinaryNode($1,temp);
+						pool.add($1);
 						delete temp;
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break; 
+				}
+				case 11:
+				{
+					Node* temp = new DbStarBinaryNode($1,$3);
+					$1 = new AsgBinaryNode($1, temp);
+					pool.add($1);
+					delete temp;
+					break;
+				}
+				case 12:
+				{
+					Node* temp = new DbSlashBinaryNode($1,$3);
+					$1 = new AsgBinaryNode($1, temp);
+					pool.add($1);
+					delete temp;
+					break;		         
 				}
 			}
 		}
@@ -249,7 +269,7 @@ expr_stmt // Used in: small_stmt
 				{
 					$$ = new AsgBinaryNode($1,$2);
 					pool.add($$);
-					($$)->eval()->print();
+					//($$)->eval()->print();
 				}
 			else $$ = $1;
 			
@@ -273,25 +293,29 @@ augassign // Used in: expr_stmt
 	| STAREQUAL 	{ $$ = '2';}
 	| SLASHEQUAL 	{ $$ = '3';}
 	| PERCENTEQUAL 	{ $$ = '4';}
-	| AMPEREQUAL
-	| VBAREQUAL
-	| CIRCUMFLEXEQUAL
-	| LEFTSHIFTEQUAL
-	| RIGHTSHIFTEQUAL
-	| DOUBLESTAREQUAL
-	| DOUBLESLASHEQUAL
+	| AMPEREQUAL 	{ $$ = 0;}
+	| VBAREQUAL 	{ $$ = 0;}
+	| CIRCUMFLEXEQUAL 	{ $$ = 0;}
+	| LEFTSHIFTEQUAL 	{ $$ = 0;}
+	| RIGHTSHIFTEQUAL 	{ $$ = 0;}
+	| DOUBLESTAREQUAL 	{ $$ = 11;}
+	| DOUBLESLASHEQUAL 	{ $$ = 12;}
 	;
 print_stmt // Used in: small_stmt
-	: PRINT opt_test
-	| PRINT RIGHTSHIFT test opt_test_2
+	: PRINT opt_test 	
+		{
+			$$ = $2;
+			$2->eval()->print();
+		}
+	| PRINT RIGHTSHIFT test opt_test_2 	{$$ = 0;}
 	;
 star_COMMA_test // Used in: star_COMMA_test, opt_test, listmaker, testlist_comp, testlist, pick_for_test
 	: star_COMMA_test COMMA test 	{$$ = $3;}
 	| %empty 	{$$ = 0;}
 	;
 opt_test // Used in: print_stmt
-	: test star_COMMA_test opt_COMMA
-	| %empty
+	: test star_COMMA_test opt_COMMA {$$ = $1;}
+	| %empty {$$ = 0;}
 	;
 plus_COMMA_test // Used in: plus_COMMA_test, opt_test_2
 	: plus_COMMA_test COMMA test
@@ -545,7 +569,11 @@ and_expr // Used in: xor_expr, and_expr
 	| and_expr AMPERSAND shift_expr 	{$$ = 0;}
 	;
 shift_expr // Used in: and_expr, shift_expr
-	: arith_expr	{$$ = $1;}
+	: arith_expr	
+	{
+		$$ = $1;
+		//$1->eval()->print();
+	}
 	| shift_expr pick_LEFTSHIFT_RIGHTSHIFT arith_expr 	{$$ = 0;}
 	;
 pick_LEFTSHIFT_RIGHTSHIFT // Used in: shift_expr
@@ -555,7 +583,8 @@ pick_LEFTSHIFT_RIGHTSHIFT // Used in: shift_expr
 arith_expr // Used in: shift_expr, arith_expr
 	: term	
 		{ 
-			$$ = $1; pool.add($$); 
+			$$ = $1; 
+			//pool.add($$); 
 			//($$)->eval()->print();
 		}
 	| arith_expr pick_PLUS_MINUS term
@@ -566,14 +595,14 @@ arith_expr // Used in: shift_expr, arith_expr
 					{
 						$$ = new AddBinaryNode($1,$3);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval();
 						break;
 					}
 				case '-':
 					{
 						$$ = new SubBinaryNode($1,$3);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval();
 						break;
 					}
 			}
@@ -593,28 +622,28 @@ term // Used in: arith_expr, term
 					{
 						$$ = new MulBinaryNode($1,$3);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break;
 					}
 				case '/' : 
 					{
 						$$ = new DivBinaryNode($1,$3);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break;
 					}
 				case '%' :
 					{
 						$$ = new PercentBinaryNode($1,$3);
 						pool.add($$);
-						($$)->eval()->print();
+						//($$)->eval()->print();
 						break;
 					}
-				case '//' :
+				case '1' :
 					{
 						break;
 					}
-				case '**' :
+				case '2' :
 					{
 						break;
 					}
@@ -626,30 +655,41 @@ pick_multop // Used in: term
 	: STAR 	{ $$ = '*';}
 	| SLASH { $$ = '/';}
 	| PERCENT 		{$$ = '%';}
-	| DOUBLESLASH 	{ $$ = '//';}
-	| DOUBLESTAR 	{ $$ = '**';}
+	| DOUBLESLASH 	{ $$ = '1';}
+	| DOUBLESTAR 	{ $$ = '2';}
 	;
 factor // Used in: term, factor, power
 	: pick_unop factor	
+	{
+		if ($2)
 		{
 			switch($1)
 			{
 				case '+': 
 					{
-						$$ = new PosUnaryNode($2);
-						pool.add($$);
-						//($$)->eval()->print();
-						break;
+						if($1)
+						{
+							$$ = new PosUnaryNode($2);
+							pool.add($$);
+							($$)->eval();
+							break;
+						}
+						else { $$ = $2;}
 					}
 				case '-':
 					{
-						$$ = new NegUnaryNode($2);
-						pool.add($$);
-						//($$)->eval()->print();
-						break;
+						if($1)
+						{
+							$$ = new NegUnaryNode($2);
+							pool.add($$);
+							($$)->eval();
+							break;
+						}
+						else 	{$$ = $2;}
 					}
-			}		
-		}
+			}
+		}		
+	}
 	| power		{$$ = $1;}
 	;
 pick_unop // Used in: factor
@@ -659,14 +699,22 @@ pick_unop // Used in: factor
 	;
 power // Used in: factor
 	: atom star_trailer DOUBLESTAR factor	{$$ = $1;}
-	| atom star_trailer		{$$ = $1;}
+	| atom star_trailer		
+	{
+		if ($2) 
+		{
+
+		}
+		else 
+			$$ = $1;
+	}
 	;
 star_trailer // Used in: power, star_trailer
 	: star_trailer trailer
 	| %empty
 	;
 atom // Used in: power
-	: LPAR opt_yield_test RPAR {$$ = 0;}
+	: LPAR opt_yield_test RPAR {$$ = $2;}
 	| LSQB opt_listmaker RSQB	{$$ = 0;}
 	| LBRACE opt_dictorsetmaker RBRACE {$$ = 0;}
 	| BACKQUOTE testlist1 BACKQUOTE	{$$ = 0;}
@@ -685,16 +733,15 @@ atom // Used in: power
 				$$ = new FloatLiteral($1);
 				pool.add($$);
 			}
-	| NUMBER { $$ = 0;}
 	| plus_STRING	{$$ = 0;}
 	;
 pick_yield_expr_testlist_comp // Used in: opt_yield_test
-	: yield_expr
-	| testlist_comp
+	: yield_expr 	{$$ = 0;}
+	| testlist_comp 	{$$ = $1;}
 	;
 opt_yield_test // Used in: atom
-	: pick_yield_expr_testlist_comp
-	| %empty
+	: pick_yield_expr_testlist_comp 	{$$ = $1;}
+	| %empty 	{$$ = 0;}
 	;
 opt_listmaker // Used in: atom
 	: listmaker
@@ -713,17 +760,17 @@ listmaker // Used in: opt_listmaker
 	| test star_COMMA_test opt_COMMA
 	;
 testlist_comp // Used in: pick_yield_expr_testlist_comp
-	: test comp_for
-	| test star_COMMA_test opt_COMMA
+	: test comp_for 	{$$ = 0;}
+	| test star_COMMA_test opt_COMMA 	{$$ = $1;}
 	;
 lambdef // Used in: test
 	: LAMBDA varargslist COLON test
 	| LAMBDA COLON test
 	;
 trailer // Used in: star_trailer
-	: LPAR opt_arglist RPAR
-	| LSQB subscriptlist RSQB
-	| DOT NAME  {delete[] $2;}
+	: LPAR opt_arglist RPAR 	{$$ = $2;}
+	| LSQB subscriptlist RSQB 	{ $$ = 0;}
+	| DOT NAME  { $$ = 0; delete[] $2;}
 	;
 subscriptlist // Used in: trailer
 	: subscript star_COMMA_subscript COMMA
@@ -787,7 +834,7 @@ opt_testlist // Used in: classdef
 	| %empty
 	;
 arglist // Used in: opt_arglist
-	: star_argument_COMMA pick_argument
+	: star_argument_COMMA pick_argument 	{$$ = $2;}
 	;
 star_argument_COMMA // Used in: arglist, star_argument_COMMA
 	: star_argument_COMMA argument COMMA
@@ -802,12 +849,12 @@ opt_DOUBLESTAR_test // Used in: pick_argument
 	| %empty
 	;
 pick_argument // Used in: arglist
-	: argument opt_COMMA
-	| STAR test star_COMMA_argument opt_DOUBLESTAR_test
-	| DOUBLESTAR test
+	: argument opt_COMMA 	{$$ = $1;}
+	| STAR test star_COMMA_argument opt_DOUBLESTAR_test 	{$$ = 0;}
+	| DOUBLESTAR test 	{$$ = 0;}
 	;
 argument // Used in: star_argument_COMMA, star_COMMA_argument, pick_argument
-	: test opt_comp_for
+	: test opt_comp_for 	{$$ = $1;}
 	| test EQUAL test
 	;
 opt_comp_for // Used in: argument

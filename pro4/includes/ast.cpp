@@ -127,3 +127,21 @@ const Literal* PercentBinaryNode::eval() const {
   return ((*x)%(*y));
 }
 
+const Literal* DbStarBinaryNode::eval() const { 
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return ((*x)^(*y));
+}
+
+
+const Literal* DbSlashBinaryNode::eval() const { 
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).DbSlash(*y);
+}
