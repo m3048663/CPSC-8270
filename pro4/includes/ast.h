@@ -8,7 +8,7 @@
 #include <string>
 #include <map>
 #include "literal.h"
-#include "node.h"
+
 
 extern void yyerror(const char*);
 extern void yyerror(const char*, const char);
@@ -23,28 +23,9 @@ private:
   std::string ident;
 };
 
-class UnaryNode : public Node {
-public:
-  UnaryNode(Node* u): Node(), unary(u) {}
-  virtual const Literal* eval() const = 0;
-  UnaryNode(const UnaryNode&) = delete;
-  UnaryNode& operator=(const UnaryNode&) = delete;
-protected:
-  Node *unary;
-};
 
-class PosUnaryNode : public UnaryNode{
-public:
-  PosUnaryNode(Node* unary):UnaryNode(unary){};
-  virtual const Literal* eval() const;
-};
 
-class NegUnaryNode : public UnaryNode{
-public:
-  NegUnaryNode(Node* unary):UnaryNode(unary){};
-  virtual const Literal* eval() const;
-};
-
+// Binary Node //////////////
 
 class BinaryNode : public Node {
 public:
@@ -59,6 +40,7 @@ protected:
   Node *right;
 };
 
+
 class AsgBinaryNode : public BinaryNode {
 public:
   AsgBinaryNode(Node* left, Node* right);
@@ -68,18 +50,6 @@ public:
 class AddBinaryNode : public BinaryNode {
 public:
   AddBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
-  virtual const Literal* eval() const;
-};
-
-class AddEqualBinaryNode : public BinaryNode {
-public:
-  AddEqualBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
-  virtual const Literal* eval() const;
-};
-
-class SubEqualBinaryNode : public BinaryNode {
-public:
-  SubEqualBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
   virtual const Literal* eval() const;
 };
 
@@ -101,11 +71,13 @@ public:
   virtual const Literal* eval() const;
 };
 
-class PercentBinaryNode : public BinaryNode {
+class PctBinaryNode : public BinaryNode {
 public:
-  PercentBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
+  PctBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
   virtual const Literal* eval() const;
 };
+
+
 
 class DbStarBinaryNode : public BinaryNode {
 public:
@@ -120,3 +92,36 @@ public:
   virtual const Literal* eval() const;
 };
 
+
+
+
+
+// Unary Node //////////////
+
+class UnaryNode : public Node {
+public:
+  UnaryNode(Node* n) :Node(), node(n) {}
+  virtual const Literal* eval() const 
+  {
+    if (!node) {
+    throw "error";
+    }
+    const Literal* x = node->eval();
+    return x->MiusOp();
+  }
+  Node* getnode() const { return node; }
+  UnaryNode(const UnaryNode&) = delete;
+  UnaryNode& operator=(const UnaryNode&) = delete;
+protected:
+  Node *node;
+
+};
+
+
+
+/*class MiusUnaryNode : public UnaryNode {
+public:
+  MiusUnaryNode(Node* n);
+  virtual const Literal* eval() const;
+};
+*/

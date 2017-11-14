@@ -196,6 +196,8 @@ small_stmt // Used in: simple_stmt, star_SEMI_small_stmt
 expr_stmt // Used in: small_stmt
 	: testlist augassign pick_yield_expr_testlist 
 		{ 
+			if($1 && $3)
+			{
 			switch($2)
 			{
 				case '0':
@@ -209,7 +211,7 @@ expr_stmt // Used in: small_stmt
 					}
 				case '1':
 					{
-						Node* temp = new SubEqualBinaryNode($1,$3);
+						Node* temp = new SubBinaryNode($1,$3);
 						$1 = new AsgBinaryNode($1,temp);
 						pool.add($1);
 						delete temp;
@@ -236,7 +238,7 @@ expr_stmt // Used in: small_stmt
 				}
 				case '4':
 				{
-						Node* temp = new PercentBinaryNode($1,$3);
+						Node* temp = new PctBinaryNode($1,$3);
 						$1 = new AsgBinaryNode($1,temp);
 						pool.add($1);
 						delete temp;
@@ -259,6 +261,7 @@ expr_stmt // Used in: small_stmt
 					delete temp;
 					break;		         
 				}
+			}
 			}
 		}
 	| testlist star_EQUAL
@@ -639,7 +642,7 @@ term // Used in: arith_expr, term
 					}
 				case '%' :
 					{
-						$$ = new PercentBinaryNode($1,$3);
+						$$ = new PctBinaryNode($1,$3);
 						pool.add($$);
 						//($$)->eval()->print();
 						break;
@@ -669,25 +672,15 @@ factor // Used in: term, factor, power
 			{
 				case '+': 
 					{
-						if($1)
-						{
-							$$ = new PosUnaryNode($2);
-							pool.add($$);
-							($$)->eval();
-							break;
-						}
-						else { $$ = $2;}
+						$$ = $2;
+						break;
 					}
 				case '-':
 					{
-						if($1)
-						{
-							$$ = new NegUnaryNode($2);
-							pool.add($$);
-							($$)->eval();
-							break;
-						}
-						else 	{$$ = $2;}
+						$$ = new UnaryNode($2);
+						pool.add($$);
+						//($$)->eval();
+						break;
 					}
 			}
 		}		
@@ -731,6 +724,7 @@ atom // Used in: power
 			{
 				$$ = new IdentNode($1);
 				delete[] $1;
+				pool.add($$);
 			}
 	| INT 	
 			{
@@ -815,8 +809,8 @@ star_COMMA_expr // Used in: exprlist, star_COMMA_expr
 	| %empty
 	;
 testlist // Used in: expr_stmt, pick_yield_expr_testlist, return_stmt, for_stmt, opt_testlist, yield_expr
-	: test star_COMMA_test COMMA 	{$$ = $1;}
-	| test star_COMMA_test { $$ = $1;}
+	: test star_COMMA_test COMMA 	
+	| test star_COMMA_test 
 	;
 dictorsetmaker // Used in: opt_dictorsetmaker
 	: test COLON test pick_for_test_test
