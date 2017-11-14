@@ -6,10 +6,10 @@
     #include <string>
     #include <stack>
 
-	int yylex (void);
-	extern char *yytext;
+    int yylex (void);
+    extern char *yytext;
     extern int yylineno;
-	void yyerror (const char *);
+    void yyerror (const char *);
     int complexity = 1;  
     int isfinally = 0;
     int trycomplexity = 0;
@@ -61,7 +61,7 @@
 %type <intNumber> INT
 %type <fltNumber> FLOAT
 %type <node> atom power factor term arith_expr testlist pick_yield_expr_testlist
-star_EQUAL shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
+star_EQUAL star_EQUAL_R shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
 arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test
 %type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign
 
@@ -266,32 +266,33 @@ expr_stmt // Used in: small_stmt
 		}
 	| testlist star_EQUAL
 		{
-			//std::cout<<"AsgBinaryNode "<<$1<<","<<$2<<std::endl;
-
-			if($2)
-				{
-					$$ = new AsgBinaryNode($1,$2);
-					pool.add($$);
-					//($$)->eval()->print();
-				}
-			else 
+			if($2 != 0)
 			{
-				$$ = $1;
-				if ($1)
-					($$)->eval()->print();
+				$$ = new AsgBinaryNode($1,$2);
+				pool.add($$);
 			}
-			
-			//pool.add($$);
 		}
 	;
 pick_yield_expr_testlist // Used in: expr_stmt, star_EQUAL
 	: yield_expr {$$ = 0;}
 	| testlist 	{$$ = $1;}
 	;
+star_EQUAL_R
+	: star_EQUAL 	{$$ = $1;}
+	| %empty 	{$$ = 0;}
+	;
 star_EQUAL // Used in: expr_stmt, star_EQUAL
-	: star_EQUAL EQUAL pick_yield_expr_testlist
+	: EQUAL pick_yield_expr_testlist star_EQUAL_R
 		{
-			$$ = $3;
+			if ($3 == 0)
+			{
+				$$ = $2;
+			}
+			else
+			{
+				$$ = new AsgBinaryNode($2,$3);
+				pool.add($$);
+			}
 		}
 	| %empty 	{$$ = 0;}
 	;
