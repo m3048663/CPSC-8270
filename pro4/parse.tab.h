@@ -144,9 +144,10 @@ union YYSTYPE
     int intNumber;
     float fltNumber;
     char *str;
+    char op;
 
 
-#line 150 "parse.tab.h" /* yacc.c:1915  */
+#line 151 "parse.tab.h" /* yacc.c:1915  */
 };
 
 typedef union YYSTYPE YYSTYPE;
