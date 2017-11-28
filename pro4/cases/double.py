@@ -3,11 +3,11 @@ y=0.3
 z=2
 e=2.14
 
-x//y
-x/y
-x**e
-(x**e)*2
--1/z+(-1/z)
-+z
+print x//y
+print x/y
+print x**e
+print (x**e)*2
+print -1/z+(-1/z)
+print +z
 
 

@@ -116,13 +116,13 @@ public:
   }
   virtual const Literal* opPct(float lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(lhs,val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
   virtual const Literal* opPct(int lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(static_cast<float>(lhs), val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
@@ -256,13 +256,13 @@ public:
   }
   virtual const Literal* opPct(float lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(lhs, val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
   virtual const Literal* opPct(int lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new IntLiteral(lhs%val);
+    const Literal* node = new IntLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
