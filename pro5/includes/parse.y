@@ -63,7 +63,8 @@
 %type <fltNumber> FLOAT
 %type <node> atom power factor term arith_expr testlist pick_yield_expr_testlist
 star_EQUAL shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
-arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test
+arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test funcdef stmt
+%type <vec> suite plus_stmt  
 %type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign
 
 %start start
