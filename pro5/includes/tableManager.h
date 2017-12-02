@@ -1,41 +1,45 @@
 #ifndef TABLEMANAGER__H
 #define TABLEMANAGER__H
 
-
 #include <iostream>
 #include <string>
+#include <map>
+#include <algorithm>
 #include <vector>
 #include "symbolTable.h"
 #include "functionTable.h"
 
+
 class Literal;
 
-class TableManager{
+
+class TableManager {
 public:
-	static TableManager& getInstance();
+  static  TableManager& getInstance();
+  const Literal* getEntry(const std::string & name); //get from symbol table
+  const Node* getSuite(const std::string & name);  //get from func table
+  void  insert(const std::string& name, const Literal* node);// insert into symbol table
+  void  insert(const std::string& name, const Node* node);// insert into function table
+  bool  checkName(const std::string& name) const; // check from symnbol table
+  bool  checkFunc(const std::string& name) const; // check from function table
 
-	const Literal* getEntry(const std::string& name);  // from symbol table
-	const Node* getSuite(const std::string& name); // from function table
 
-	void insert(const std::string& name, const Literal* node);
-	void insert(const std::string& name, const Node* node);
+  void  pushScope();
+  void  popScope();
+  void  display() const;
 
-	bool checkName(const std::string& name) const;
-	bool checkFunc(const std::string& name) const;
-
-	void pushScope();
-	void pushScope();
-	void display() const;
-
+  
 private:
-	int currentScope;
-	std::vector<symbolTable> tables;
-	std::vector<functionTable> functions;
-
-	TableManager() : currentScope(0), tables(), functions() {
-		tables.push_back(symbolTable());
-		functions.push_back(FunctionTable());
-	}
+  int currentScope;
+  std::vector<SymbolTable> tables;
+  std::vector<FunctionTable> functions;
+  TableManager() :currentScope(0), tables(),functions() {
+    tables.push_back(SymbolTable());
+    functions.push_back(FunctionTable());
+  }
 };
+
+
+
 
 #endif

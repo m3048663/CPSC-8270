@@ -10,28 +10,13 @@
 	extern char *yytext;
     extern int yylineno;
 	void yyerror (const char *);
-    int complexity = 1;  
-    int isfinally = 0;
-    int trycomplexity = 0;
-    int tmp = 0;
+
 
 	PoolOfNodes& pool = PoolOfNodes::getInstance();
 
        
-    struct funcInfo
-    {
-        int line;
-        std::string funcname;
-        int column;
-        int complexity = 1;
 
-    }func;
-
-    void reverse(std::stack<struct funcInfo>);
     void yyerror (const char *s);
-    
-    std::stack<funcInfo> f;
-
 %}
 
 %union
@@ -39,13 +24,11 @@
     Node* node;
     int intNumber;
     float fltNumber;
-    std::vector<Node*>* vec;
-    char *str;
     char op;
+    char* str;
 
 }
 
-%type <str> NAME
 
 // 83 tokens, in alphabetical order:
 %token AMPEREQUAL AMPERSAND AND AS ASSERT AT BACKQUOTE BAR BREAK CIRCUMFLEX
@@ -61,10 +44,10 @@
 
 %type <intNumber> INT
 %type <fltNumber> FLOAT
+%type <str> NAME
 %type <node> atom power factor term arith_expr testlist pick_yield_expr_testlist
 star_EQUAL shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
-arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test funcdef stmt
-%type <vec> suite plus_stmt  
+arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test funcdef stmt suite plus_stmt pick_NEWLINE_stmt star_NEWLINE_stmt decorated exec_stmt assert_stmt compound_stmt if_stmt simple_stmt small_stmt flow_stmt return_stmt star_ELIF
 %type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign
 
 %start start
@@ -78,16 +61,36 @@ start
 	;
 file_input // Used in: start
 	: star_NEWLINE_stmt ENDMARKER
-        {
-            reverse(f);
-        }
+	{
+		//TableManager::getInstance().display();
+	}
 	;
 pick_NEWLINE_stmt // Used in: star_NEWLINE_stmt
 	: NEWLINE
+	{
+		/*
+		$$ = new PrintNode(nullptr);
+		pool.add($$);
+		*/
+	}
 	| stmt
+	{
+		// Evaluate each statement of the program:
+		
+		if ($1) {
+			$1->eval();
+		}
+		else{
+			std::cout << "Can't evaluate the whole program" << std::endl;
+		}
+		
+	}
 	;
 star_NEWLINE_stmt // Used in: file_input, star_NEWLINE_stmt
 	: star_NEWLINE_stmt pick_NEWLINE_stmt
+	{
+		$$ = $2;
+	}
 	| %empty
 	;
 decorator // Used in: decorators
@@ -105,33 +108,16 @@ decorators // Used in: decorators, decorated
 decorated // Used in: compound_stmt
 	: decorators classdef
 	| decorators funcdef
+	{
+		$$ = $2;
+	}
 	;
 funcdef // Used in: decorated, compound_stmt
 	: DEF NAME parameters COLON suite	
         {
         	$$ = new FuncNode($2,$5);
-
-            func.line = @1.first_line;
-            func.column = @1.first_column - 1;
-            func.funcname = $2;
-            if (isfinally)
-            {   
-                func.complexity = complexity;
-            }
-            else
-            {   func.complexity = complexity + trycomplexity;}
-            
-            if (func.column == 0) 
-            {    
-                f.push(func);
-                trycomplexity = 0;
-                complexity = 1;
-            }
-            else
-                complexity++;
-
-            delete[] $2;
-
+        	pool.add($$);
+        	delete[] $2;
         }
 	;
 parameters // Used in: funcdef
@@ -151,19 +137,18 @@ star_fpdef_COMMA // Used in: varargslist, star_fpdef_COMMA
 	| %empty
 	;
 opt_DOUBLESTAR_NAME // Used in: pick_STAR_DOUBLESTAR
-	: COMMA DOUBLESTAR NAME     {delete[] $3;}
-	| %empty
+	: COMMA DOUBLESTAR NAME     
 	;
 pick_STAR_DOUBLESTAR // Used in: varargslist
-	: STAR NAME opt_DOUBLESTAR_NAME {delete[] $2;}
-	| DOUBLESTAR NAME   {delete[] $2;}
+	: STAR NAME opt_DOUBLESTAR_NAME 
+	| DOUBLESTAR NAME   
 	;
 opt_COMMA // Used in: varargslist, opt_test, opt_test_2, testlist_safe, listmaker, testlist_comp, pick_for_test_test, pick_for_test, pick_argument
 	: COMMA
 	| %empty
 	;
 fpdef // Used in: varargslist, star_fpdef_COMMA, fplist, star_fpdef_notest
-	: NAME  {delete[] $1;}
+	: NAME  
 	| LPAR fplist RPAR
 	;
 fplist // Used in: fpdef
@@ -175,27 +160,27 @@ star_fpdef_notest // Used in: fplist, star_fpdef_notest
 	| %empty
 	;
 stmt // Used in: pick_NEWLINE_stmt, plus_stmt
-	: simple_stmt          
-	| compound_stmt     
+	: simple_stmt    { $$ = $1;}      
+	| compound_stmt  { $$ = $1;}   
 	;
 simple_stmt // Used in: stmt, suite
-	: small_stmt star_SEMI_small_stmt SEMI NEWLINE
-	| small_stmt star_SEMI_small_stmt NEWLINE
+	: small_stmt star_SEMI_small_stmt SEMI NEWLINE  { $$ = $1;}
+	| small_stmt star_SEMI_small_stmt NEWLINE 		{ $$ = $1;}
 	;
 star_SEMI_small_stmt // Used in: simple_stmt, star_SEMI_small_stmt
 	: star_SEMI_small_stmt SEMI small_stmt
 	| %empty
 	;
 small_stmt // Used in: simple_stmt, star_SEMI_small_stmt
-	: expr_stmt
-	| print_stmt
-	| del_stmt
-	| pass_stmt
-	| flow_stmt
-	| import_stmt
-	| global_stmt
-	| exec_stmt
-	| assert_stmt
+	: expr_stmt 	{$$ = $1;}
+	| print_stmt 	{$$ = $1;}
+	| del_stmt 		{$$ = 0;}
+	| pass_stmt 	{$$ = 0;}
+	| flow_stmt 	{$$ = $1;}
+	| import_stmt 	{$$ = 0;}
+	| global_stmt 	{$$ = 0;}
+	| exec_stmt 	{$$ = 0;}
+	| assert_stmt	{$$ = 0;}
 	;
 expr_stmt // Used in: small_stmt
 	: testlist augassign pick_yield_expr_testlist 
@@ -273,19 +258,17 @@ expr_stmt // Used in: small_stmt
 			//std::cout<<"AsgBinaryNode "<<$1<<","<<$2<<std::endl;
 
 			if($2)
-				{
-					$$ = new AsgBinaryNode($1,$2);
-					pool.add($$);
-					//($$)->eval()->print();
-				}
+			{
+				$$ = new AsgBinaryNode($1,$2);
+				pool.add($$);
+				//($$)->eval()->print();
+			}
 			else 
 			{
 				$$ = $1;
-				if ($1)
-					($$)->eval()->print();
+				//if ($1)
+					//($$)->eval()->print();
 			}
-			
-			//pool.add($$);
 		}
 	;
 pick_yield_expr_testlist // Used in: expr_stmt, star_EQUAL
@@ -316,8 +299,13 @@ augassign // Used in: expr_stmt
 print_stmt // Used in: small_stmt
 	: PRINT opt_test 	
 		{
-			$$ = $2;
-			$2->eval()->print();
+			//$$ = $2;
+			//$2->eval()->print();
+			if ($2)
+				$$ = new PrintNode($2);
+			else 
+				$$ = nullptr;
+
 		}
 	| PRINT RIGHTSHIFT test opt_test_2 	{$$ = 0;}
 	;
@@ -327,7 +315,7 @@ star_COMMA_test // Used in: star_COMMA_test, opt_test, listmaker, testlist_comp,
 	;
 opt_test // Used in: print_stmt
 	: test star_COMMA_test opt_COMMA {$$ = $1;}
-	| %empty {$$ = 0;}
+	| %empty {$$ = nullptr;}
 	;
 plus_COMMA_test // Used in: plus_COMMA_test, opt_test_2
 	: plus_COMMA_test COMMA test
@@ -344,11 +332,11 @@ pass_stmt // Used in: small_stmt
 	: PASS
 	;
 flow_stmt // Used in: small_stmt
-	: break_stmt
-	| continue_stmt
-	| return_stmt
-	| raise_stmt
-	| yield_stmt
+	: break_stmt 	{$$ = 0;}
+	| continue_stmt {$$ = 0;}
+	| return_stmt 	{$$ = $1;}
+	| raise_stmt 	{$$ = 0;}
+	| yield_stmt 	{$$ = 0;}
 	;
 break_stmt // Used in: flow_stmt
 	: BREAK
@@ -357,8 +345,8 @@ continue_stmt // Used in: flow_stmt
 	: CONTINUE
 	;
 return_stmt // Used in: flow_stmt
-	: RETURN testlist
-	| RETURN
+	: RETURN testlist 	{ $$ = $2;}
+	| RETURN 	{ $$ = nullptr;}
 	;
 yield_stmt // Used in: flow_stmt
 	: yield_expr
@@ -395,7 +383,7 @@ pick_STAR_import // Used in: import_from
 	| import_as_names
 	;
 import_as_name // Used in: import_as_names, star_COMMA_import_as_name
-	: NAME AS NAME  {delete[] $1; delete[] $3;}
+	: NAME AS NAME  {delete [] $1; delete[] $3;}
 	| NAME          {delete[] $1;}
 	;
 dotted_as_name // Used in: dotted_as_names
@@ -426,30 +414,41 @@ star_COMMA_NAME // Used in: global_stmt, star_COMMA_NAME
 	| %empty
 	;
 exec_stmt // Used in: small_stmt
-	: EXEC expr IN test opt_COMMA_test
-	| EXEC expr
+	: EXEC expr IN test opt_COMMA_test 	{$$ = nullptr;}
+	| EXEC expr 	{ $$ = nullptr;}
 	;
 assert_stmt // Used in: small_stmt
-	: ASSERT test COMMA test
-	| ASSERT test
+	: ASSERT test COMMA test 	{ $$ = nullptr;}
+	| ASSERT test 				{ $$ = nullptr;}
 	;
 compound_stmt // Used in: stmt
-	: if_stmt           
-	| while_stmt        {complexity++;}
-	| for_stmt          {complexity++;}
-	| {tmp = complexity; }try_stmt
-	| with_stmt
-	| funcdef
-	| classdef
-	| decorated
+	: if_stmt       { $$ = $1;}    
+	| while_stmt    { $$ = nullptr;}    
+	| for_stmt      { $$ = nullptr;}    
+	| try_stmt   	{ $$ = nullptr;}
+	| with_stmt 	{ $$ = nullptr;}
+	| funcdef 		{ $$ = $1;}
+	| classdef 		{ $$ = nullptr;}
+	| decorated 	{ $$ = $1;}
 	;
 if_stmt // Used in: compound_stmt
-	: IF test COLON suite star_ELIF ELSE COLON suite  {complexity++;}    
-	| IF test COLON suite star_ELIF     {complexity++;}
+	: IF test COLON suite star_ELIF ELSE COLON suite    
+	{
+		if ($2){
+			$$ = new IfNode($2,$4,$8);
+			pool.add($$);
+		}
+		else
+			$$ = nullptr;
+	}
+	| IF test COLON suite star_ELIF     
 	;
 star_ELIF // Used in: if_stmt, star_ELIF
-	: star_ELIF ELIF test COLON suite  {complexity++;}
-	| %empty
+	: star_ELIF ELIF test COLON suite  
+		{
+			$$ = nullptr;
+		}
+	| %empty 	{ $$ = nullptr;}
 	;
 while_stmt // Used in: compound_stmt
 	: WHILE test COLON suite ELSE COLON suite       
@@ -461,13 +460,7 @@ for_stmt // Used in: compound_stmt
 	;
 try_stmt // Used in: compound_stmt
 	: TRY COLON suite plus_except opt_ELSE opt_FINALLY  
-	{
-		if(isfinally == 0) 
-			complexity++;  
-		else 
-			complexity = tmp;  
-	}
-	| TRY COLON suite FINALLY COLON suite               {trycomplexity++;}
+	| TRY COLON suite FINALLY COLON suite       
 	;
 plus_except // Used in: try_stmt, plus_except
 	: plus_except except_clause COLON suite
@@ -479,9 +472,6 @@ opt_ELSE // Used in: try_stmt
 	;
 opt_FINALLY // Used in: try_stmt
 	: FINALLY COLON suite 
-	{	
-		isfinally = 1;
-	}
 	| %empty
 	;
 with_stmt // Used in: compound_stmt
@@ -496,8 +486,8 @@ with_item // Used in: with_stmt, star_COMMA_with_item
 	| test
 	;
 except_clause // Used in: plus_except
-	: EXCEPT test opt_AS_COMMA	{complexity++;}
-	| EXCEPT 	{complexity++;}
+	: EXCEPT test opt_AS_COMMA	
+	| EXCEPT 	
 	;
 pick_AS_COMMA // Used in: opt_AS_COMMA
 	: AS
@@ -508,24 +498,26 @@ opt_AS_COMMA // Used in: except_clause
 	| %empty
 	;
 suite // Used in: funcdef, if_stmt, star_ELIF, while_stmt, for_stmt, try_stmt, plus_except, opt_ELSE, opt_FINALLY, with_stmt, classdef
-	: simple_stmt             
+	: simple_stmt     { $$ = $1;}        
 	| NEWLINE INDENT plus_stmt DEDENT   
 		{
-			$$ = new SuiteNode(*$3);
-			delete $3;
+			$$ = $3;
 		}
 	;
 plus_stmt // Used in: suite, plus_stmt
 	: plus_stmt stmt        
 		{
 			$$ = $1;
-			$$->push_back($2);
+			dynamic_cast<SuiteNode*>$$->insert($2);
+			//((SuiteNode*)$$)->insert($2);
+			//$$->insert($2);
 		}
 	| stmt                  
 		{
-			$$ = new std::vector<Node*>();
-			$$->reserve(8);
-			$$->push_back($1);
+			$$ = new SuiteNode();
+			dynamic_cast<SuiteNode*>$$->insert($1);
+			pool.add($$);
+			//((SuiteNode*)$$)->insert($1);
 		}
 	;
 testlist_safe // Used in: list_for
@@ -597,7 +589,6 @@ shift_expr // Used in: and_expr, shift_expr
 	: arith_expr	
 	{
 		$$ = $1;
-		//$1->eval()->print();
 	}
 	| shift_expr pick_LEFTSHIFT_RIGHTSHIFT arith_expr 	{$$ = 0;}
 	;
@@ -722,14 +713,16 @@ power // Used in: factor
 	{
 		if ($2) 
 		{
-
+			std::string funcname = reinterpret_cast<IdentNode*>($1)->getIdent();
+			$$ = new CallNode(funcname);
+			pool.add($$);
 		}
 		else 
 			$$ = $1;
 	}
 	;
 star_trailer // Used in: power, star_trailer
-	: star_trailer trailer
+	: star_trailer trailer 	{ $$ = $2;}
 	| %empty 	{$$ = 0;}
 	;
 atom // Used in: power
@@ -788,7 +781,15 @@ lambdef // Used in: test
 	| LAMBDA COLON test
 	;
 trailer // Used in: star_trailer
-	: LPAR opt_arglist RPAR 	{$$ = $2;}
+	: LPAR opt_arglist RPAR 	
+	{
+		if($2)
+			$$ = $2;
+		else
+			$$ = new IdentNode("NULL");
+
+		pool.add($$);
+	}
 	| LSQB subscriptlist RSQB 	{ $$ = 0;}
 	| DOT NAME  { $$ = 0; delete[] $2;}
 	;
@@ -846,8 +847,8 @@ pick_for_test // Used in: dictorsetmaker
 	| star_COMMA_test opt_COMMA
 	;
 classdef // Used in: decorated, compound_stmt
-	: CLASS NAME LPAR opt_testlist RPAR COLON suite {delete[] $2;}
-	| CLASS NAME COLON suite    {delete[] $2;}
+	: CLASS NAME LPAR opt_testlist RPAR COLON suite 
+	| CLASS NAME COLON suite    
 	;
 opt_testlist // Used in: classdef
 	: testlist
@@ -922,18 +923,6 @@ star_DOT // Used in: pick_dotted_name, star_DOT
 
 #include <stdio.h>
 
-void reverse(std::stack<struct funcInfo> f)
-{
-    while(!f.empty())
-    {
-        std::cout << "(\"" << f.top().line << ":" << f.top().column << ": "
-                      <<  "'" << f.top().funcname << "'\", "  
-                      << f.top().complexity << ")" << std::endl;
-
-        f.pop();
-    }
-
-}
 void yyerror (const char *s)
 {
     if(yylloc.first_line > 0)	{

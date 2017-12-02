@@ -34,13 +34,15 @@ public:
   virtual const Literal* opDbSlash(float) const =0;
   virtual const Literal* opDbSlash(int) const =0;
 
+  virtual const Literal* Less(const Literal& rhs) const = 0;
+  virtual const Literal* opLess(float) const = 0;
+  virtual const Literal* opLess(int) const = 0;
 
   //Unary operator
   //virtual const Literal* PlusOp()  const = 0;
   virtual const Literal* MiusOp()  const = 0;
 
-
-
+  virtual const bool isTrue() const = 0;
   virtual const Literal* eval() const = 0;
   virtual void print() const { 
     std::cout << "No Way" << std::endl; 
@@ -116,13 +118,13 @@ public:
   }
   virtual const Literal* opPct(float lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(lhs,val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
   virtual const Literal* opPct(int lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(static_cast<float>(lhs), val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
@@ -163,7 +165,27 @@ public:
   }
 
 
+  virtual const Literal* Less(const Literal& rhs) const {
+    return rhs.opLess(val);
+  }
+  virtual const Literal* opLess(float lhs) const {
+    const Literal* node;
+    if(lhs < val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
 
+    PoolOfNodes::getInstance().add(node);
+  }
+  virtual const Literal* opLess(int lhs) const {
+    const Literal* node;
+    if(lhs < val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+  }
 
 
 
@@ -178,6 +200,7 @@ public:
 
 
   virtual const Literal* eval() const { return this; }
+  virtual const bool isTrue() const { return this->val;}
   virtual void print() const { 
     std::cout << "FLOAT: " << val << std::endl; 
   }
@@ -256,13 +279,13 @@ public:
   }
   virtual const Literal* opPct(float lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new FloatLiteral(fmod(lhs, val));
+    const Literal* node = new FloatLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
   virtual const Literal* opPct(int lhs) const  {
     if ( val == 0 ) throw std::string("Zero Division Error");
-    const Literal* node = new IntLiteral(lhs%val);
+    const Literal* node = new IntLiteral(fmod(fmod(lhs,val)+val,val));
     PoolOfNodes::getInstance().add(node);
     return node;
   }
@@ -301,6 +324,28 @@ public:
     return node;
   }
 
+  virtual const Literal* Less(const Literal& rhs) const {
+    return rhs.opLess(val);
+  }
+  virtual const Literal* opLess(float lhs) const {
+    const Literal* node;
+    if(lhs < val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+  }
+  virtual const Literal* opLess(int lhs) const {
+    const Literal* node;
+    if(lhs < val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+  }
+
 
 
 
@@ -311,7 +356,9 @@ public:
     return node; 
   }
 
-
+  virtual const bool isTrue() const {
+    return this->val;
+  }
   virtual const Literal* eval() const { return this; }
   virtual void print() const { 
     std::cout << "INT: " << val << std::endl; 

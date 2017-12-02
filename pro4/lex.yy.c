@@ -2683,6 +2683,14 @@ int yylex(void)
 }
 
 
+void end_scanner()
+{
+	if (tok)
+	   free(tok);
+}
+
+
+
 /* Debug version: call this to print each token as you get it */
 int debug_yylex(void)
 {

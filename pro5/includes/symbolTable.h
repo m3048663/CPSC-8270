@@ -4,19 +4,36 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <algorithm>
+
 
 class Literal;
 
+
 class SymbolTable {
 public:
-  SymbolTable() : table() {}
+  SymbolTable():table(){};
   bool found(const std::string& name) const;
   void insert(const std::string& name, const Literal* val);
-  const Literal* getEntry(const std::string& name) const;
+  const Literal* getEntry(const	std::string& name) const;
   void display() const;
+
 private:
   std::map<std::string, const Literal*> table;
 };
+
+/*class SymbolTable {
+public:
+  static   SymbolTable& getInstance();
+  void     setValue(const std::string& name, const Literal* val);
+  const Literal* getValue(const std::string& name) const;
+private:
+  std::map<std::string, const Literal*> table;
+  SymbolTable() : table() {}
+};
+
+*/
+
+
+
 
 #endif

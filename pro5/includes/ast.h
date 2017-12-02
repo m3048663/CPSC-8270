@@ -8,7 +8,7 @@
 #include <string>
 #include <map>
 #include "literal.h"
-
+#include "tableManager.h"
 
 extern void yyerror(const char*);
 extern void yyerror(const char*, const char);
@@ -24,6 +24,39 @@ private:
 };
 
 
+
+class IfNode : public Node{
+public:
+  IfNode(const Node* n, const Node* ts, const Node* es):
+    test(n),thenSuite(ts),elseSuite(es) {}
+  virtual const Literal* eval() const;
+protected:
+  const Node* test;
+  const Node* thenSuite;
+  const Node* elseSuite;
+};
+
+
+/*
+class ReturnNode : public Node {
+public:
+  ReturnNode(const Node* n) : node(n) {
+
+  }
+};
+*/
+
+class CallNode : public Node {
+public:
+  CallNode(const std::string id) :Node(), ident(id) {}
+  virtual const Literal* eval() const; 
+  virtual ~CallNode() {}
+  const std::string getName() const { return ident; }
+protected:
+  std::string ident;
+
+};
+
 class FuncNode : public Node {
 public:
   FuncNode(const std::string id, Node* stmts);
@@ -37,11 +70,24 @@ private:
 
 class SuiteNode : public Node {
 public:
-  SuiteNode(const std::vector<Node*> s) : Node() , stmts(s) {}
+  SuiteNode() : Node() , stmts() {}
+  void insert(Node* i);
   virtual ~SuiteNode() {}
   virtual const Literal* eval() const;
 private:
   std::vector<Node*> stmts;
+};
+
+
+class PrintNode : public Node {
+public:
+  PrintNode(Node* n) :Node(), node(n) {}
+  virtual const Literal* eval() const;
+
+  Node* getnode() const { return node; }
+protected:
+  Node *node;
+
 };
 
 
@@ -113,6 +159,43 @@ public:
 };
 
 
+class LessBinaryNode : public BinaryNode {
+public:
+  LessBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+
+/*
+class GrBinaryNode : public BinaryNode {
+public:
+  GrBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+
+class EqeqBinaryNode : public BinaryNOde {
+public:
+  EqeqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+
+class GreqBinaryNode : public BinaryNode {
+public:
+  GreqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+
+class LesseqBinaryNode : public BinaryNOde {
+public:
+  LesseqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+
+class NoteqBinaryNode : public BinaryNode {
+public:
+  NoteqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  virtual const Literal* eval() const;
+};
+*/
 
 
 
@@ -138,10 +221,3 @@ protected:
 };
 
 
-
-/*class MiusUnaryNode : public UnaryNode {
-public:
-  MiusUnaryNode(Node* n);
-  virtual const Literal* eval() const;
-};
-*/
