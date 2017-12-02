@@ -77,7 +77,7 @@ const Literal* IfNode::eval() const{
   
   if (flag) {
     if ( ! thenSuite) throw std::string("thenSuite is null");
-    tm.pushScope();
+    //tm.pushScope();
     thenSuite->eval();
 
     /*
@@ -90,7 +90,7 @@ const Literal* IfNode::eval() const{
       tm.popScope();
     }
     */
-    tm.popScope();
+    //tm.popScope();
 
   }
   else if ( !flag ){
@@ -98,7 +98,7 @@ const Literal* IfNode::eval() const{
       // This is probably an If with no ELSE
       return nullptr;
     }
-    tm.pushScope();
+    //tm.pushScope();
     elseSuite->eval();
     
 
@@ -112,7 +112,7 @@ const Literal* IfNode::eval() const{
       tm.popScope();
     }
     */
-    tm.popScope();
+    //tm.popScope();
 
 
   }

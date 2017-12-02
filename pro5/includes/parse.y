@@ -48,7 +48,7 @@
 %type <node> atom power factor term arith_expr testlist pick_yield_expr_testlist
 star_EQUAL shift_expr and_expr xor_expr expr comparison not_test and_test or_test opt_IF_ELSE test star_COMMA_test expr_stmt parameters star_trailer trailer opt_arglist 
 arglist argument pick_argument pick_yield_expr_testlist_comp opt_yield_test testlist_comp print_stmt opt_test funcdef stmt suite plus_stmt pick_NEWLINE_stmt star_NEWLINE_stmt decorated exec_stmt assert_stmt compound_stmt if_stmt simple_stmt small_stmt flow_stmt return_stmt star_ELIF
-%type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign
+%type <op>	pick_PLUS_MINUS pick_multop pick_unop augassign comp_op
 
 %start start
 
@@ -68,10 +68,8 @@ file_input // Used in: start
 pick_NEWLINE_stmt // Used in: star_NEWLINE_stmt
 	: NEWLINE
 	{
-		/*
 		$$ = new PrintNode(nullptr);
 		pool.add($$);
-		*/
 	}
 	| stmt
 	{
@@ -558,20 +556,31 @@ not_test // Used in: and_test, not_test
 	;
 comparison // Used in: not_test, comparison
 	: expr 		{$$ = $1;}
-	| comparison comp_op expr {$$ = 0;}
+	| comparison comp_op expr 
+	{
+		switch ($2)
+		{
+			case 1 : 
+			{
+				$$ = new LessBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+		}
+	}
 	;
 comp_op // Used in: comparison
-	: LESS
-	| GREATER
-	| EQEQUAL
-	| GREATEREQUAL
-	| LESSEQUAL
-	| GRLT
-	| NOTEQUAL
-	| IN
-	| NOT IN
-	| IS
-	| IS NOT
+	: LESS 			{ $$ = 1;}
+	| GREATER 		{ $$ = 2;}
+	| EQEQUAL 		{ $$ = 3;}
+	| GREATEREQUAL 	{ $$ = 4;}
+	| LESSEQUAL 	{ $$ = 5;}
+	| GRLT 			{ $$ = 0;}
+	| NOTEQUAL 		{ $$ = 6;}
+	| IN 			{ $$ = 0;}
+	| NOT IN 		{ $$ = 0;}
+	| IS 			{ $$ = 0;}
+	| IS NOT 		{ $$ = 0;}
 	;
 expr // Used in: exec_stmt, with_item, comparison, expr, exprlist, star_COMMA_expr
 	: xor_expr	{$$ = $1;}
