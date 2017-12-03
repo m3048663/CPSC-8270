@@ -433,13 +433,23 @@ if_stmt // Used in: compound_stmt
 	: IF test COLON suite star_ELIF ELSE COLON suite    
 	{
 		if ($2){
+			std::cout << "get IfNode() with else statement" << std::endl;
 			$$ = new IfNode($2,$4,$8);
 			pool.add($$);
 		}
 		else
 			$$ = nullptr;
 	}
-	| IF test COLON suite star_ELIF     
+	| IF test COLON suite star_ELIF   
+	{
+		if ($2){
+			std::cout << "get IfNode() without else" << std::endl;
+			$$ = new IfNode($2,$4,nullptr);
+			pool.add($$);
+		}
+		else 
+			$$ = nullptr;
+	}  
 	;
 star_ELIF // Used in: if_stmt, star_ELIF
 	: star_ELIF ELIF test COLON suite  
@@ -507,8 +517,6 @@ plus_stmt // Used in: suite, plus_stmt
 		{
 			$$ = $1;
 			dynamic_cast<SuiteNode*>$$->insert($2);
-			//((SuiteNode*)$$)->insert($2);
-			//$$->insert($2);
 		}
 	| stmt                  
 		{
@@ -563,6 +571,7 @@ comparison // Used in: not_test, comparison
 			case 1 : 
 			{
 				$$ = new LessBinaryNode($1,$3);
+				std::cout << $$->eval() << std::endl;
 				pool.add($$);
 				break;
 			}

@@ -28,7 +28,9 @@ private:
 class IfNode : public Node{
 public:
   IfNode(const Node* n, const Node* ts, const Node* es):
-    test(n),thenSuite(ts),elseSuite(es) {}
+    test(n),thenSuite(ts),elseSuite(es) {
+      std::cout << "in IfNode()" << std::endl;
+    }
   virtual const Literal* eval() const;
 protected:
   const Node* test;

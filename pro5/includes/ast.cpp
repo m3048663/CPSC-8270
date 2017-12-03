@@ -46,24 +46,32 @@ void SuiteNode::insert(Node* i)
 }
 
 const Literal* SuiteNode::eval() const {
-  for(const Node* n : stmts){
-    if (n) n->eval();
-    else
-      throw std::string("A suite node is nullptr");
-    /*
-    if (TableManager::getInstance().checkName("__RETURN__"))
+  if (stmts.empty()) return nullptr;
+  else
     {
-      break;
+      for(const Node* n : stmts){
+      if (n) 
+        {
+          n->eval();
+        }
+      else
+        throw std::string("A suite node is nullptr");
+      /*
+      if (TableManager::getInstance().checkName("__RETURN__"))
+      {
+        break;
+      }
+      */
+      }
+      return nullptr;
     }
-    */
-  }
-  return nullptr;
 }
 
 
 
 
 const Literal* IfNode::eval() const{
+  std::cout <<"eval Ifnode" << std::endl;
   if (!test) return 0;
 
   TableManager& tm = TableManager::getInstance();
@@ -73,13 +81,12 @@ const Literal* IfNode::eval() const{
   if (!lit) throw std::string("Couldn't evaluate test in IfNode");
 
   bool flag = lit->eval()->isTrue();
-  
+  std::cout << "get Ifnode flag" << std::endl;
   
   if (flag) {
-    if ( ! thenSuite) throw std::string("thenSuite is null");
-    //tm.pushScope();
+    if (!thenSuite) throw std::string("thenSuite is null");
+    tm.pushScope();
     thenSuite->eval();
-
     /*
     if(tm.checkName("__RETURN__")) {
       const Literal* ret = tm.getEntry("__RETURN__");
@@ -90,7 +97,7 @@ const Literal* IfNode::eval() const{
       tm.popScope();
     }
     */
-    //tm.popScope();
+    tm.popScope();
 
   }
   else if ( !flag ){
@@ -98,7 +105,7 @@ const Literal* IfNode::eval() const{
       // This is probably an If with no ELSE
       return nullptr;
     }
-    //tm.pushScope();
+    tm.pushScope();
     elseSuite->eval();
     
 
@@ -112,7 +119,7 @@ const Literal* IfNode::eval() const{
       tm.popScope();
     }
     */
-    //tm.popScope();
+    tm.popScope();
 
 
   }
