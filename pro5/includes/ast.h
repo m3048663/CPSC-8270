@@ -27,14 +27,14 @@ private:
 
 class IfNode : public Node{
 public:
-  IfNode(const Node* n, const Node* ts, const Node* es):
-    test(n),thenSuite(ts),elseSuite(es) {
+  IfNode(const Node* n, const Node* ifstmt, const Node* elsestmt):
+    test(n),ifSuite(ifstmt),elseSuite(elsestmt) {
       std::cout << "in IfNode()" << std::endl;
     }
   virtual const Literal* eval() const;
 protected:
   const Node* test;
-  const Node* thenSuite;
+  const Node* ifSuite;
   const Node* elseSuite;
 };
 
@@ -61,7 +61,8 @@ protected:
 
 class FuncNode : public Node {
 public:
-  FuncNode(const std::string id, Node* stmts);
+  FuncNode(const std::string id, Node* stmts): Node(),ident(id),suite(stmts){}
+  FuncNode(const FuncNode&) = delete;
   virtual ~FuncNode() {}
   const std::string getIdent() const {return ident;}
   virtual const Literal* eval() const;

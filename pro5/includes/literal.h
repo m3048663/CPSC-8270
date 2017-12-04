@@ -176,6 +176,7 @@ public:
       node = new FloatLiteral(0);
 
     PoolOfNodes::getInstance().add(node);
+    return node;
   }
   virtual const Literal* opLess(int lhs) const {
     const Literal* node;
@@ -185,6 +186,7 @@ public:
       node = new FloatLiteral(0);
 
     PoolOfNodes::getInstance().add(node);
+    return node;
   }
 
 
@@ -200,7 +202,7 @@ public:
 
 
   virtual const Literal* eval() const { return this; }
-  virtual const bool isTrue() const { return this->val;}
+  virtual const bool isTrue() const { return bool(this->val);}
   virtual void print() const { 
     std::cout << "FLOAT: " << val << std::endl; 
   }
@@ -335,6 +337,7 @@ public:
       node = new IntLiteral(0);
 
     PoolOfNodes::getInstance().add(node);
+    return node;
   }
   virtual const Literal* opLess(int lhs) const {
     const Literal* node;
@@ -344,6 +347,7 @@ public:
       node = new IntLiteral(0);
 
     PoolOfNodes::getInstance().add(node);
+    return node;
   }
 
 

@@ -29,14 +29,8 @@ const Literal* CallNode::eval() const{
   // return res;
 }
 
-
-FuncNode::FuncNode(const std::string id, Node* stmts) :
-  Node(),ident(id),suite(stmts) {
-    TableManager::getInstance().insert(id,suite);
-  }
-
 const Literal* FuncNode::eval() const {
-  std::cout << "Call Function : ...." << std::endl;
+  TableManager::getInstance().insert(ident,suite);
   return nullptr;
 }
 
@@ -71,62 +65,19 @@ const Literal* SuiteNode::eval() const {
 
 
 const Literal* IfNode::eval() const{
-  std::cout <<"eval Ifnode" << std::endl;
-  if (!test) return 0;
-
-  TableManager& tm = TableManager::getInstance();
-
+  if(!test) return nullptr;
+  std::cout <<"IfNode eval()" << std::endl;
   const Literal* lit = test->eval();
-  lit = dynamic_cast<const Literal*>(lit);
-  if (!lit) throw std::string("Couldn't evaluate test in IfNode");
+  if(!lit) throw std::string("test boolean operator is unvaild");
 
-  bool flag = lit->eval()->isTrue();
-  std::cout << "get Ifnode flag" << std::endl;
-  
-  if (flag) {
-    if (!thenSuite) throw std::string("thenSuite is null");
-    tm.pushScope();
-    thenSuite->eval();
-    /*
-    if(tm.checkName("__RETURN__")) {
-      const Literal* ret = tm.getEntry("__RETURN__");
-      tm.popScope();
-      tm.insertSymb("__RETURN__",ret);
-    }
-    else{
-      tm.popScope();
-    }
-    */
-    tm.popScope();
-
+  if(lit->isTrue())
+  {
+    ifSuite->eval();
   }
-  else if ( !flag ){
-    if ( ! elseSuite ){
-      // This is probably an If with no ELSE
-      return nullptr;
-    }
-    tm.pushScope();
+  else if(elseSuite)
+  {
     elseSuite->eval();
-    
-
-    /*
-    if(tm.checkName("__RETURN__")) {
-      const Literal* ret = tm.getEntry("__RETURN__");
-      tm.popScope();
-      tm.insertSymb("__RETURN__",ret);
-    }
-    else{
-      tm.popScope();
-    }
-    */
-    tm.popScope();
-
-
   }
-  else {
-    throw std::string("Neither true nor false?");
-  }
-
   return nullptr;
 }
 

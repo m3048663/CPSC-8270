@@ -67,28 +67,18 @@ file_input // Used in: start
 	;
 pick_NEWLINE_stmt // Used in: star_NEWLINE_stmt
 	: NEWLINE
-	{
-		$$ = new PrintNode(nullptr);
-		pool.add($$);
-	}
 	| stmt
-	{
-		// Evaluate each statement of the program:
-		
+	{	
 		if ($1) {
 			$1->eval();
 		}
 		else{
 			std::cout << "Can't evaluate the whole program" << std::endl;
 		}
-		
 	}
 	;
 star_NEWLINE_stmt // Used in: file_input, star_NEWLINE_stmt
 	: star_NEWLINE_stmt pick_NEWLINE_stmt
-	{
-		$$ = $2;
-	}
 	| %empty
 	;
 decorator // Used in: decorators
@@ -96,8 +86,8 @@ decorator // Used in: decorators
 	| AT dotted_name NEWLINE
 	;
 opt_arglist // Used in: decorator, trailer
-	: arglist 	{$$ = $1;}
-	| %empty 	{$$ = 0;}
+	: arglist 
+	| %empty 	
 	;
 decorators // Used in: decorators, decorated
 	: decorators decorator
@@ -135,18 +125,18 @@ star_fpdef_COMMA // Used in: varargslist, star_fpdef_COMMA
 	| %empty
 	;
 opt_DOUBLESTAR_NAME // Used in: pick_STAR_DOUBLESTAR
-	: COMMA DOUBLESTAR NAME     
+	: COMMA DOUBLESTAR NAME     {delete[] $3;}
 	;
 pick_STAR_DOUBLESTAR // Used in: varargslist
-	: STAR NAME opt_DOUBLESTAR_NAME 
-	| DOUBLESTAR NAME   
+	: STAR NAME opt_DOUBLESTAR_NAME  {delete[] $2;}
+	| DOUBLESTAR NAME   {delete[] $2;}
 	;
 opt_COMMA // Used in: varargslist, opt_test, opt_test_2, testlist_safe, listmaker, testlist_comp, pick_for_test_test, pick_for_test, pick_argument
 	: COMMA
 	| %empty
 	;
 fpdef // Used in: varargslist, star_fpdef_COMMA, fplist, star_fpdef_notest
-	: NAME  
+	: NAME  {delete[] $1;}
 	| LPAR fplist RPAR
 	;
 fplist // Used in: fpdef
@@ -172,13 +162,13 @@ star_SEMI_small_stmt // Used in: simple_stmt, star_SEMI_small_stmt
 small_stmt // Used in: simple_stmt, star_SEMI_small_stmt
 	: expr_stmt 	{$$ = $1;}
 	| print_stmt 	{$$ = $1;}
-	| del_stmt 		{$$ = 0;}
-	| pass_stmt 	{$$ = 0;}
+	| del_stmt 		{$$ = nullptr;}
+	| pass_stmt 	{$$ = nullptr;}
 	| flow_stmt 	{$$ = $1;}
-	| import_stmt 	{$$ = 0;}
-	| global_stmt 	{$$ = 0;}
-	| exec_stmt 	{$$ = 0;}
-	| assert_stmt	{$$ = 0;}
+	| import_stmt 	{$$ = nullptr;}
+	| global_stmt 	{$$ = nullptr;}
+	| exec_stmt 	{$$ = nullptr;}
+	| assert_stmt	{$$ = nullptr;}
 	;
 expr_stmt // Used in: small_stmt
 	: testlist augassign pick_yield_expr_testlist 
@@ -297,8 +287,6 @@ augassign // Used in: expr_stmt
 print_stmt // Used in: small_stmt
 	: PRINT opt_test 	
 		{
-			//$$ = $2;
-			//$2->eval()->print();
 			if ($2)
 				$$ = new PrintNode($2);
 			else 
@@ -516,14 +504,13 @@ plus_stmt // Used in: suite, plus_stmt
 	: plus_stmt stmt        
 		{
 			$$ = $1;
-			dynamic_cast<SuiteNode*>$$->insert($2);
+			dynamic_cast<SuiteNode*>($$)->insert($2);
 		}
 	| stmt                  
 		{
 			$$ = new SuiteNode();
-			dynamic_cast<SuiteNode*>$$->insert($1);
+			dynamic_cast<SuiteNode*>($$)->insert($1);
 			pool.add($$);
-			//((SuiteNode*)$$)->insert($1);
 		}
 	;
 testlist_safe // Used in: list_for
@@ -571,7 +558,6 @@ comparison // Used in: not_test, comparison
 			case 1 : 
 			{
 				$$ = new LessBinaryNode($1,$3);
-				std::cout << $$->eval() << std::endl;
 				pool.add($$);
 				break;
 			}
@@ -801,15 +787,17 @@ lambdef // Used in: test
 trailer // Used in: star_trailer
 	: LPAR opt_arglist RPAR 	
 	{
+	/*
 		if($2)
 			$$ = $2;
 		else
 			$$ = new IdentNode("NULL");
 
 		pool.add($$);
+	*/
 	}
 	| LSQB subscriptlist RSQB 	{ $$ = 0;}
-	| DOT NAME  { $$ = 0; delete[] $2;}
+	| DOT NAME  { delete[] $2;}
 	;
 subscriptlist // Used in: trailer
 	: subscript star_COMMA_subscript COMMA
@@ -846,7 +834,7 @@ star_COMMA_expr // Used in: exprlist, star_COMMA_expr
 	;
 testlist // Used in: expr_stmt, pick_yield_expr_testlist, return_stmt, for_stmt, opt_testlist, yield_expr
 	: test star_COMMA_test COMMA 	
-	| test star_COMMA_test 
+	| test star_COMMA_test 	{$$ = $1;}
 	;
 dictorsetmaker // Used in: opt_dictorsetmaker
 	: test COLON test pick_for_test_test
@@ -865,8 +853,8 @@ pick_for_test // Used in: dictorsetmaker
 	| star_COMMA_test opt_COMMA
 	;
 classdef // Used in: decorated, compound_stmt
-	: CLASS NAME LPAR opt_testlist RPAR COLON suite 
-	| CLASS NAME COLON suite    
+	: CLASS NAME LPAR opt_testlist RPAR COLON suite  {delete[] $2;}
+	| CLASS NAME COLON suite    {delete[] $2;}
 	;
 opt_testlist // Used in: classdef
 	: testlist
