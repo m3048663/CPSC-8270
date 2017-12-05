@@ -24,7 +24,7 @@ public:
   bool  checkFunc(const std::string& name) const; // check from function table
 
 
-  void  pushScope();
+  void  pushScope(const std::string& name);
   void  popScope();
   void  display() const;
 

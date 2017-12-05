@@ -67,6 +67,10 @@ file_input // Used in: start
 	;
 pick_NEWLINE_stmt // Used in: star_NEWLINE_stmt
 	: NEWLINE
+	{
+		$$ = new PrintNode(0); 
+		pool.add($$);
+	}
 	| stmt
 	{	
 		if ($1) {
@@ -86,8 +90,8 @@ decorator // Used in: decorators
 	| AT dotted_name NEWLINE
 	;
 opt_arglist // Used in: decorator, trailer
-	: arglist 
-	| %empty 	
+	: arglist 	{ $$ = $1;}
+	| %empty 	{ $$ = nullptr;}
 	;
 decorators // Used in: decorators, decorated
 	: decorators decorator
@@ -96,9 +100,6 @@ decorators // Used in: decorators, decorated
 decorated // Used in: compound_stmt
 	: decorators classdef
 	| decorators funcdef
-	{
-		$$ = $2;
-	}
 	;
 funcdef // Used in: decorated, compound_stmt
 	: DEF NAME parameters COLON suite	
@@ -331,8 +332,16 @@ continue_stmt // Used in: flow_stmt
 	: CONTINUE
 	;
 return_stmt // Used in: flow_stmt
-	: RETURN testlist 	{ $$ = $2;}
-	| RETURN 	{ $$ = nullptr;}
+	: RETURN testlist 	
+	{ 
+		$$ = new ReturnNode($2);
+		pool.add($$);
+	}
+	| RETURN 	
+	{ 
+		$$ = new ReturnNode(nullptr);
+		pool.add($$);
+	}
 	;
 yield_stmt // Used in: flow_stmt
 	: yield_expr

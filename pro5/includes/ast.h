@@ -39,14 +39,19 @@ protected:
 };
 
 
-/*
-class ReturnNode : public Node {
-public:
-  ReturnNode(const Node* n) : node(n) {
 
-  }
+class ReturnNode : public Node
+{
+public:
+  ReturnNode(Node* n, std::string re="__RETURN__"):Node(),node(n),name(re){}
+  virtual const Literal* eval() const;
+private:
+  Node *node;
+  std::string name;
+  
 };
-*/
+
+
 
 class CallNode : public Node {
 public:
@@ -61,7 +66,9 @@ protected:
 
 class FuncNode : public Node {
 public:
-  FuncNode(const std::string id, Node* stmts): Node(),ident(id),suite(stmts){}
+  FuncNode(const std::string id, Node* stmts): Node(),ident(id),suite(stmts){
+    TableManager::getInstance().insert(ident,suite);
+  }
   FuncNode(const FuncNode&) = delete;
   virtual ~FuncNode() {}
   const std::string getIdent() const {return ident;}

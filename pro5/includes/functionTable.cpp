@@ -27,6 +27,6 @@ void FunctionTable::display() const
 	std::map<std::string, const Node*>::const_iterator it = functions.begin();
 	for (; it != functions.end(); ++it)
 	{
-		std::cout << it->first << " : " << it->second->eval() << std::endl;
+		std::cout << it->first << std::endl;
 	}
 }

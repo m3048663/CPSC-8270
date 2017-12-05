@@ -42,7 +42,7 @@ public:
   //virtual const Literal* PlusOp()  const = 0;
   virtual const Literal* MiusOp()  const = 0;
 
-  virtual const bool isTrue() const = 0;
+  virtual bool isTrue() const = 0;
   virtual const Literal* eval() const = 0;
   virtual void print() const { 
     std::cout << "No Way" << std::endl; 
@@ -202,7 +202,9 @@ public:
 
 
   virtual const Literal* eval() const { return this; }
-  virtual const bool isTrue() const { return bool(this->val);}
+  
+  virtual bool isTrue() const { return bool(this->val);}
+  
   virtual void print() const { 
     std::cout << "FLOAT: " << val << std::endl; 
   }
@@ -360,8 +362,8 @@ public:
     return node; 
   }
 
-  virtual const bool isTrue() const {
-    return this->val;
+  virtual bool isTrue() const {
+    return bool(this->val);
   }
   virtual const Literal* eval() const { return this; }
   virtual void print() const { 

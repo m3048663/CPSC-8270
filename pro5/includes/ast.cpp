@@ -20,7 +20,7 @@ const Literal* CallNode::eval() const{
     throw up;
   }
 
-  tm.pushScope();
+  tm.pushScope(ident);
   tm.getSuite(ident)->eval();
   //const Literal* res = TableManager::getInstance().getEntry("__RETURN__");
   tm.popScope();
@@ -30,7 +30,6 @@ const Literal* CallNode::eval() const{
 }
 
 const Literal* FuncNode::eval() const {
-  TableManager::getInstance().insert(ident,suite);
   return nullptr;
 }
 
@@ -82,7 +81,15 @@ const Literal* IfNode::eval() const{
 }
 
 
-
+const Literal* ReturnNode::eval() const {
+  if(node){
+    const Literal* res = node->eval();
+    TableManager::getInstance().insert(name,res);
+    return res;
+  }
+  else
+    return nullptr;
+}
 
 
 const Literal* PrintNode::eval() const
