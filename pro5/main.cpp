@@ -31,7 +31,7 @@ int main(int argc, char * argv[]) {
     fprintf(stderr,"Abnormal termination\n");
   }
   else
-  std::cout << "Program syntactically correct" << std::endl;
+    //std::cout << "Program syntactically correct" << std::endl;
 
   return (parse_had_errors ? EXIT_FAILURE : EXIT_SUCCESS);
 

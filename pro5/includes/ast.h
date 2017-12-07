@@ -29,7 +29,7 @@ class IfNode : public Node{
 public:
   IfNode(const Node* n, const Node* ifstmt, const Node* elsestmt):
     test(n),ifSuite(ifstmt),elseSuite(elsestmt) {
-      std::cout << "in IfNode()" << std::endl;
+      //std::cout << "in IfNode()" << std::endl;
     }
   virtual const Literal* eval() const;
 protected:
@@ -43,7 +43,20 @@ protected:
 class ReturnNode : public Node
 {
 public:
-  ReturnNode(Node* n, std::string re="__RETURN__"):Node(),node(n),name(re){}
+  ReturnNode(Node* n, std::string re="__RETURN__"):Node(),node(n),name(re){
+    /*
+    if(node)
+      {
+        const Literal* res = node->eval();
+        TableManager::getInstance().insert(name,res);
+      }
+    else
+    {
+      const Literal* res = new IntLiteral(0);
+      TableManager::getInstance().insert(name,res);
+    }
+    */
+  }
   virtual const Literal* eval() const;
 private:
   Node *node;
@@ -67,7 +80,7 @@ protected:
 class FuncNode : public Node {
 public:
   FuncNode(const std::string id, Node* stmts): Node(),ident(id),suite(stmts){
-    TableManager::getInstance().insert(ident,suite);
+    //TableManager::getInstance().insert(ident,suite);
   }
   FuncNode(const FuncNode&) = delete;
   virtual ~FuncNode() {}
@@ -175,14 +188,16 @@ public:
   virtual const Literal* eval() const;
 };
 
-/*
+
 class GrBinaryNode : public BinaryNode {
 public:
-  GrBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
+  GrBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {
+    std::cout << "Great Binary Node" << std::endl;
+  }
   virtual const Literal* eval() const;
 };
 
-class EqeqBinaryNode : public BinaryNOde {
+class EqeqBinaryNode : public BinaryNode {
 public:
   EqeqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
   virtual const Literal* eval() const;
@@ -194,7 +209,7 @@ public:
   virtual const Literal* eval() const;
 };
 
-class LesseqBinaryNode : public BinaryNOde {
+class LesseqBinaryNode : public BinaryNode {
 public:
   LesseqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
   virtual const Literal* eval() const;
@@ -205,7 +220,7 @@ public:
   NoteqBinaryNode(Node* left, Node* right) : BinaryNode(left,right) {}
   virtual const Literal* eval() const;
 };
-*/
+
 
 
 

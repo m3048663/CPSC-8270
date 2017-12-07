@@ -55,6 +55,8 @@ void  TableManager::insert(const std::string& name, const Node* node)
 }
 bool  TableManager::checkName(const std::string& name) const
 {
+	return tables[currentScope].found(name);
+	/*
 	std::vector<SymbolTable>::const_reverse_iterator rit = tables.rbegin();
 	for(; rit != tables.rend();rit++)
 	{
@@ -63,6 +65,7 @@ bool  TableManager::checkName(const std::string& name) const
 		else
 			return false;
 	}
+	*/
 	/* with warning : comparison of integers of different signs
 	for ( int i = 0; i < tables.size(); i++)
 		if ( tables[i].found(name))
@@ -74,6 +77,8 @@ bool  TableManager::checkName(const std::string& name) const
 }
 bool  TableManager::checkFunc(const std::string& name) const
 {
+	return functions[currentScope].found(name);
+	/*
 	std::vector<FunctionTable>::const_reverse_iterator rit = functions.rbegin();
 	for(; rit != functions.rend();rit++)
 	{
@@ -82,6 +87,7 @@ bool  TableManager::checkFunc(const std::string& name) const
 		else
 			return false;
 	}
+	*/
 /* with warning
 	for ( int i = 0; i < functions.size(); i++)
 		if ( functions[i].found(name))
@@ -92,16 +98,11 @@ bool  TableManager::checkFunc(const std::string& name) const
 	return 0;
 }
 
-void  TableManager::pushScope(const std::string& name)
+void  TableManager::pushScope()
 { 
 	currentScope++;
 	FunctionTable ftable;
 	SymbolTable stable;
-
-	if(checkFunc(name))
-	{
-		ftable.insert(name,functions[0].getEntry(name));
-	}
 	tables.push_back(stable);
 	functions.push_back(ftable);
 
@@ -118,14 +119,14 @@ void  TableManager::display() const
 	std::vector<SymbolTable>::const_iterator it = tables.begin();
 	for (; it!=tables.end(); ++it)
 	{
-		std::cout << "Symboltable : " << std::endl;
+		std::cout << "Symboltable : currentScope=" << currentScope << std::endl;
 		it->display();
 	}
 
 	std::vector<FunctionTable>::const_iterator fit = functions.begin();
 	for (; fit!=functions.end(); ++fit)
 	{
-		std::cout << "FuncTable : "<< std::endl;
+		std::cout << "FuncTable : currentScope="<< currentScope <<std::endl;
 		fit->display();
 	}
 	

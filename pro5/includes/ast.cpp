@@ -15,13 +15,14 @@ const Literal* IdentNode::eval() const {
 const Literal* CallNode::eval() const{
   TableManager& tm = TableManager::getInstance();
   if(!tm.checkFunc(ident)){
-    std::cout << "function" << ident << "Not Found" << std::endl;
+    std::cout << "Function " << ident << "Not Found" << std::endl;
     std::exception up = std::exception();
     throw up;
   }
 
-  tm.pushScope(ident);
+  tm.pushScope();
   tm.getSuite(ident)->eval();
+  //TableManager::getInstance().display();
   //const Literal* res = TableManager::getInstance().getEntry("__RETURN__");
   tm.popScope();
 
@@ -30,6 +31,7 @@ const Literal* CallNode::eval() const{
 }
 
 const Literal* FuncNode::eval() const {
+  TableManager::getInstance().insert(ident,suite);
   return nullptr;
 }
 
@@ -46,6 +48,9 @@ const Literal* SuiteNode::eval() const {
       if (n) 
         {
           n->eval();
+          //std::cout << TableManager::getInstance().checkName("__RETURN__") << std::endl;
+          if(TableManager::getInstance().checkName("__RETURN__"))
+            return TableManager::getInstance().getEntry("__RETURN__");
         }
       else
         throw std::string("A suite node is nullptr");
@@ -65,7 +70,6 @@ const Literal* SuiteNode::eval() const {
 
 const Literal* IfNode::eval() const{
   if(!test) return nullptr;
-  std::cout <<"IfNode eval()" << std::endl;
   const Literal* lit = test->eval();
   if(!lit) throw std::string("test boolean operator is unvaild");
 
@@ -82,13 +86,15 @@ const Literal* IfNode::eval() const{
 
 
 const Literal* ReturnNode::eval() const {
-  if(node){
-    const Literal* res = node->eval();
-    TableManager::getInstance().insert(name,res);
-    return res;
+  if(!node){
+    const Literal* res=new IntLiteral(0);
+    PoolOfNodes::getInstance().add(res);
+    TableManager::getInstance().insert(name, res);
+    return 0;
   }
-  else
-    return nullptr;
+  const Literal* res=node->eval();
+  TableManager::getInstance().insert(name, res);
+  return res;
 }
 
 
@@ -96,10 +102,10 @@ const Literal* PrintNode::eval() const
 {
   if (!node) {
   std::cout<<std::endl;
-  return 0;
+  return nullptr;
   }
   node->eval()->print();
-  return 0 ;
+  return nullptr;
 }
 
 
@@ -205,3 +211,47 @@ const Literal* LessBinaryNode::eval() const {
   return (*x).Less(*y);
 }
 
+const Literal* GrBinaryNode::eval() const {
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).Gr(*y);
+}
+
+const Literal* EqeqBinaryNode::eval() const {
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).Eqeq(*y);
+}
+
+const Literal* GreqBinaryNode::eval() const {
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).Greq(*y);
+}
+
+const Literal* LesseqBinaryNode::eval() const {
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).Lesseq(*y);
+}
+
+const Literal* NoteqBinaryNode::eval() const {
+  if (!left || !right) {
+    throw "error";
+  }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  return (*x).Noteq(*y);
+}

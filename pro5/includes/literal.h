@@ -38,11 +38,30 @@ public:
   virtual const Literal* opLess(float) const = 0;
   virtual const Literal* opLess(int) const = 0;
 
+  virtual const Literal* Gr(const Literal& rhs) const = 0;
+  virtual const Literal* opGr(float) const = 0;
+  virtual const Literal* opGr(int) const = 0;
+
+  virtual const Literal* Eqeq(const Literal& rhs) const = 0;
+  virtual const Literal* opEqeq(float) const = 0;
+  virtual const Literal* opEqeq(int) const = 0;
+
+  virtual const Literal* Greq(const Literal& rhs) const = 0;
+  virtual const Literal* opGreq(float) const = 0;
+  virtual const Literal* opGreq(int) const = 0;
+
+  virtual const Literal* Lesseq(const Literal& rhs) const = 0;
+  virtual const Literal* opLesseq(float) const = 0;
+  virtual const Literal* opLesseq(int) const = 0;
+
+  virtual const Literal* Noteq(const Literal& rhs) const = 0;
+  virtual const Literal* opNoteq(float) const = 0;
+  virtual const Literal* opNoteq(int) const = 0;
+
   //Unary operator
-  //virtual const Literal* PlusOp()  const = 0;
   virtual const Literal* MiusOp()  const = 0;
 
-  virtual bool isTrue() const = 0;
+  virtual int isTrue() const = 0;
   virtual const Literal* eval() const = 0;
   virtual void print() const { 
     std::cout << "No Way" << std::endl; 
@@ -189,6 +208,125 @@ public:
     return node;
   }
 
+  virtual const Literal* Gr(const Literal& rhs) const {
+    return rhs.opGr(val);
+  }
+  virtual const Literal* opGr(float lhs) const {
+    const Literal* node;
+    if(lhs > val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opGr(int lhs) const {
+    const Literal* node;
+    if(lhs > val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Eqeq(const Literal& rhs) const {
+    return rhs.opEqeq(val);
+  }
+  virtual const Literal* opEqeq(float lhs) const {
+    const Literal* node;
+    if(lhs == val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opEqeq(int lhs) const {
+    const Literal* node;
+    if(lhs == val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Greq(const Literal& rhs) const {
+    return rhs.opGreq(val);
+  }
+  virtual const Literal* opGreq(float lhs) const {
+    const Literal* node;
+    if(lhs >= val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opGreq(int lhs) const {
+    const Literal* node;
+    if(lhs >= val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Lesseq(const Literal& rhs) const {
+    return rhs.opLesseq(val);
+  }
+  virtual const Literal* opLesseq(float lhs) const {
+    const Literal* node;
+    if(lhs <= val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opLesseq(int lhs) const {
+    const Literal* node;
+    if(lhs <= val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Noteq(const Literal& rhs) const {
+    return rhs.opNoteq(val);
+  }
+  virtual const Literal* opNoteq(float lhs) const {
+    const Literal* node;
+    if(lhs != val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opNoteq(int lhs) const {
+    const Literal* node;
+    if(lhs != val)
+      node = new FloatLiteral(1);
+    else
+      node = new FloatLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
 
 
 
@@ -203,7 +341,7 @@ public:
 
   virtual const Literal* eval() const { return this; }
   
-  virtual bool isTrue() const { return bool(this->val);}
+  virtual int isTrue() const { return int(this->val);}
   
   virtual void print() const { 
     std::cout << "FLOAT: " << val << std::endl; 
@@ -343,6 +481,7 @@ public:
   }
   virtual const Literal* opLess(int lhs) const {
     const Literal* node;
+    std::cout << "eval Less" << std::endl;
     if(lhs < val)
       node = new IntLiteral(1);
     else
@@ -353,6 +492,126 @@ public:
   }
 
 
+virtual const Literal* Gr(const Literal& rhs) const {
+    return rhs.opGr(val);
+  }
+  virtual const Literal* opGr(float lhs) const {
+    const Literal* node;
+    if(lhs >val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opGr(int lhs) const {
+    const Literal* node;
+    std::cout << "eval Greater" << std::endl;
+    if(lhs > val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Eqeq(const Literal& rhs) const {
+    return rhs.opEqeq(val);
+  }
+  virtual const Literal* opEqeq(float lhs) const {
+    const Literal* node;
+    if(lhs == val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opEqeq(int lhs) const {
+    const Literal* node;
+    if(lhs == val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Greq(const Literal& rhs) const {
+    return rhs.opGreq(val);
+  }
+  virtual const Literal* opGreq(float lhs) const {
+    const Literal* node;
+    if(lhs >= val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opGreq(int lhs) const {
+    const Literal* node;
+    if(lhs >= val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Lesseq(const Literal& rhs) const {
+    return rhs.opLesseq(val);
+  }
+  virtual const Literal* opLesseq(float lhs) const {
+    const Literal* node;
+    if(lhs <= val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opLesseq(int lhs) const {
+    const Literal* node;
+    if(lhs <= val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+
+  virtual const Literal* Noteq(const Literal& rhs) const {
+    return rhs.opNoteq(val);
+  }
+  virtual const Literal* opNoteq(float lhs) const {
+    const Literal* node;
+    if(lhs != val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
+  virtual const Literal* opNoteq(int lhs) const {
+    const Literal* node;
+    if(lhs != val)
+      node = new IntLiteral(1);
+    else
+      node = new IntLiteral(0);
+
+    PoolOfNodes::getInstance().add(node);
+    return node;
+  }
 
 
   //Unary operator
@@ -362,8 +621,8 @@ public:
     return node; 
   }
 
-  virtual bool isTrue() const {
-    return bool(this->val);
+  virtual int isTrue() const {
+    return (this->val);
   }
   virtual const Literal* eval() const { return this; }
   virtual void print() const { 

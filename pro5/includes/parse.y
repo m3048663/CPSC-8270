@@ -430,7 +430,7 @@ if_stmt // Used in: compound_stmt
 	: IF test COLON suite star_ELIF ELSE COLON suite    
 	{
 		if ($2){
-			std::cout << "get IfNode() with else statement" << std::endl;
+			//std::cout << "get IfNode() with else statement" << std::endl;
 			$$ = new IfNode($2,$4,$8);
 			pool.add($$);
 		}
@@ -440,7 +440,7 @@ if_stmt // Used in: compound_stmt
 	| IF test COLON suite star_ELIF   
 	{
 		if ($2){
-			std::cout << "get IfNode() without else" << std::endl;
+			//std::cout << "get IfNode() without else" << std::endl;
 			$$ = new IfNode($2,$4,nullptr);
 			pool.add($$);
 		}
@@ -567,6 +567,36 @@ comparison // Used in: not_test, comparison
 			case 1 : 
 			{
 				$$ = new LessBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+			case 2 :
+			{
+				$$ = new GrBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+			case 3 :
+			{
+				$$ = new EqeqBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+			case 4 :
+			{
+				$$ = new GreqBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+			case 5 :
+			{
+				$$ = new LesseqBinaryNode($1,$3);
+				pool.add($$);
+				break;
+			}
+			case 6 :
+			{
+				$$ = new NoteqBinaryNode($1,$3);
 				pool.add($$);
 				break;
 			}
