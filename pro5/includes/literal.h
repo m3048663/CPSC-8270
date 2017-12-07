@@ -481,7 +481,7 @@ public:
   }
   virtual const Literal* opLess(int lhs) const {
     const Literal* node;
-    std::cout << "eval Less" << std::endl;
+    //std::cout << "eval Less" << std::endl;
     if(lhs < val)
       node = new IntLiteral(1);
     else

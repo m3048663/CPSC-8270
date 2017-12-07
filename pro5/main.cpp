@@ -7,6 +7,7 @@
 extern int yyparse();
 
 extern void init_scanner(FILE *);
+extern void end_scanner();
 
 static FILE * 
 open_file(const char *filename) {
@@ -27,11 +28,16 @@ int main(int argc, char * argv[]) {
   init_scanner(input_file);
   //yydebug = 0;  /* Change to 1 if you want debugging */
   int parse_had_errors = yyparse();
+
+  PoolOfNodes::getInstance().drainThePool();
+  fclose(input_file);
+  end_scanner();
+
   if (parse_had_errors) {
     fprintf(stderr,"Abnormal termination\n");
   }
   else
-    //std::cout << "Program syntactically correct" << std::endl;
+    std::cout << "Program syntactically correct" << std::endl;
 
   return (parse_had_errors ? EXIT_FAILURE : EXIT_SUCCESS);
 

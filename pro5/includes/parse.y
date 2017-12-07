@@ -289,7 +289,10 @@ print_stmt // Used in: small_stmt
 	: PRINT opt_test 	
 		{
 			if ($2)
-				$$ = new PrintNode($2);
+				{
+					$$ = new PrintNode($2);
+					pool.add($$);
+				}
 			else 
 				$$ = nullptr;
 
