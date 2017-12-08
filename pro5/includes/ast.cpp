@@ -93,6 +93,7 @@ const Literal* ReturnNode::eval() const {
     return 0;
   }
   const Literal* res=node->eval();
+  res->print();
   TableManager::getInstance().insert(name, res);
   return res;
 }

@@ -83,7 +83,7 @@ pick_NEWLINE_stmt // Used in: star_NEWLINE_stmt
 	;
 star_NEWLINE_stmt // Used in: file_input, star_NEWLINE_stmt
 	: star_NEWLINE_stmt pick_NEWLINE_stmt
-	| %empty
+	| %empty 	{ $$ = nullptr;}
 	;
 decorator // Used in: decorators
 	: AT dotted_name LPAR opt_arglist RPAR NEWLINE
@@ -98,8 +98,8 @@ decorators // Used in: decorators, decorated
 	| decorator
 	;
 decorated // Used in: compound_stmt
-	: decorators classdef
-	| decorators funcdef
+	: decorators classdef 	{$$ = nullptr;}
+	| decorators funcdef  	{$$ = nullptr;}
 	;
 funcdef // Used in: decorated, compound_stmt
 	: DEF NAME parameters COLON suite	

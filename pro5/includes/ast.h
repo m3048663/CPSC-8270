@@ -31,6 +31,9 @@ public:
     test(n),ifSuite(ifstmt),elseSuite(elsestmt) {
       //std::cout << "in IfNode()" << std::endl;
     }
+  IfNode(const IfNode&) = delete;
+  const IfNode* operator=(const IfNode& i) = delete;
+  ~IfNode() {}
   virtual const Literal* eval() const;
 protected:
   const Node* test;
@@ -57,6 +60,9 @@ public:
     }
     */
   }
+  ReturnNode(const ReturnNode&) = delete;
+  const ReturnNode* operator=(const ReturnNode& r) = delete;
+  ~ReturnNode() {}
   virtual const Literal* eval() const;
 private:
   Node *node;
@@ -83,6 +89,7 @@ public:
     //TableManager::getInstance().insert(ident,suite);
   }
   FuncNode(const FuncNode&) = delete;
+  FuncNode* operator=(const FuncNode&) = delete;
   virtual ~FuncNode() {}
   const std::string getIdent() const {return ident;}
   virtual const Literal* eval() const;
@@ -106,6 +113,9 @@ class PrintNode : public Node {
 public:
   PrintNode(Node* n) :Node(), node(n) {}
   virtual const Literal* eval() const;
+  PrintNode* operator=(const PrintNode&) = delete;
+  ~PrintNode() {}
+  PrintNode(const PrintNode&) = delete;
 
   Node* getnode() const { return node; }
 protected:
