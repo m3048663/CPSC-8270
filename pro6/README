@@ -1,0 +1,16 @@
+Project 6 : Python paramter and recursive
+Name : Hui Ma
+
+Paramter:
+1. Add ArgumentNode() and ParameterNode()
+2. Add pure virtual function getIdent in Node() base class so that I can get Argument name using getIdent() function.
+3. build parameter table <FunctionTable> for each function in TableManager.
+
+
+Recursive:
+1. two test cases for one and two parameters within function
+
+
+
+Problems that I had in completing this project: 
+

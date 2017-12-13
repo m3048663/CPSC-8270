@@ -1,0 +1,25 @@
+CPSC 8270 project 5
+Hui MA
+
+This project is to parse simple function, and do if else.
+
+If else : for boolean operator, set GreatBinaryNode, LessBinaryNode, NoteqBinaryNode, GreqBinaryNode, LesseqBinaryNode, EqeqBinaryNode for ">","<","!=",">=","<="
+          Set IfNode to do logical action. if test is right, eval IfSuite, else eval elseSuite.
+
+Def Function : set FuncNode for each function definition. Each FuncNode include std::string for Function name and SuiteNode for every statements in the function.
+
+TableManager : it is a singleton.
+	       the only one instance include a vector for Symboltable and another vector for FunctionTable and a int variable "currentScope".
+	       use the manager, can check whether the functionname in the currentscope functiontable and whether variable name in the currentscope.
+               the display() will show everything in the current functionTable and SymbolTable.
+
+FunctionTable : std::map<std::string, Node*>
+                function name and SuiteNode would save into the table.
+		
+Symboltable : std::map<std::string, Literval*>
+		variable name and its value would save into the table.
+
+ReturnNode : return value and break the current function.
+
+
+MemoryLeakage : like project 4, don't need do any special action for it.
